@@ -1,6 +1,6 @@
 # Import all required libraries
 from random import randint
-import PIL
+from PIL import ImageGrab
 import pyscreeze
 import pyautogui
 import pydirectinput
@@ -8,24 +8,37 @@ import pydirectinput as direct
 import time
 import math
 
+from pygame.examples.window_opengl import image
+
+
 # Displays the hovered over position on the screen
 def getCoords():
     while True:
         xp, xy = pyautogui.position()
         print(str(pyautogui.position()) + "\n" + str(pyautogui.pixel(xp, xy)))
 
-# Goes to a position in a grid with x1,x2,y1,y2 defining the corners
-def moveGrid(x,y,gridIn):
-    xSpacing = (gridIn[1] - gridIn[0]) / gridIn[4]
-    ySpacing = (gridIn[3] - gridIn[2]) / gridIn[5]
-    xgo = math.floor(gridIn[0] + xSpacing * (x + 0.5))
-    ygo = math.floor(gridIn[2] + ySpacing * (y + 0.5))
-    pydirectinput.moveTo(xgo,ygo)
-
 # Sets the failsafe delay to 0 while keeping the corner breakout
 def setupFailsafes():
     pydirectinput.FAILSAFE = True
     pydirectinput.PAUSE = 0
+
+# Goes to a position in a grid with x1,x2,y1,y2 defining the corners
+def moveGrid(x,y,gridIn,shiftX=0,shiftY=0):
+    xSpacing = (gridIn[2] - gridIn[0]) / gridIn[4]
+    ySpacing = (gridIn[3] - gridIn[1]) / gridIn[5]
+    xgo = math.floor(gridIn[0] + xSpacing * (x + 0.5 + shiftX))
+    ygo = math.floor(gridIn[1] + ySpacing * (y + 0.5 + shiftY))
+    pydirectinput.moveTo(xgo,ygo)
+
+# Moves and clicks at a desired position
+def moveClick(x,y,gridIn,shiftX=0,shiftY=0):
+    moveGrid(x,y,gridIn,shiftX,shiftY)
+    pydirectinput.click()
+
+# Scans the board and determines what all of the squares are
+def scanGrid(grid):
+    img = ImageGrab.grab(grid[0:3])
+    img.save("testImage.png","PNG")
 
 # Notes on the minesweeper board dimensions
 '''
@@ -48,13 +61,14 @@ print("Bottom right set to: " + str(x2) + " " + str(y2))
 # Define remaining size data and compact all of the values into a list for convinience
 width = 24
 hieght = 20
-grid = [x1,x2,y1,y2,width,hieght]
+grid = [x1,y1,x2,y2,width,hieght]
 
 # Add a small amount of delay
 print("Beginning sequence in 2 seconds")
 time.sleep(2)
 
-# Perform the solver on the grid (currently tests the movement function over 10 positions)
-for i in range(0,1000):
-    moveGrid(randint(0,23),randint(0,19),grid)
-    time.sleep(1)
+# Click the center square to get things started
+centerX = math.floor(width/2)
+centerY = math.floor(hieght/2)
+moveClick(centerX,centerY,grid)
+scanGrid()
