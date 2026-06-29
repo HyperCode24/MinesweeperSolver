@@ -153,8 +153,10 @@ moveClick(centerX,centerY,grid)
 waitForDebris()
 scannedBoard = scanGrid(grid)
 
-# Work in progress, will likely become a function and then be put above this comment
+# Find edge tiles and set up states for edge tiles
 edgeTiles = []
+edgeTilesState = []
+edgeTilesLength = 0
 for y in range(0, grid[5]):
     for x in range(0, grid[4]):
         if scannedBoard[y][x] == -1:
@@ -169,6 +171,26 @@ for y in range(0, grid[5]):
                         valid = 1
             if valid == 1:
                 edgeTiles.append([x,y])
-print(edgeTiles)
+                edgeTilesState.append(-1)
+                edgeTilesLength = edgeTilesLength + 1
+
+# Iterate over every possibility of edge tiles and check if they are valid
+cursor = 0
+while not(cursor >= edgeTilesLength):
+    cursor = 0
+    lastSet = -1
+    # Place the bombs on a test board
+    bombBoard = scannedBoard.copy()
+    for i in range(0,edgeTilesLength):
+        if edgeTilesState[i] == 1:
+            xo, yo = edgeTiles[i]
+            bombBoard[yo][xo] = 9
+    # Test if this placement is valid
 
 
+
+    # Increment through the remaining possibilities
+    while lastSet == -1 and not(cursor >= edgeTilesLength):
+        edgeTilesState[cursor] = edgeTilesState[cursor] * -1
+        lastSet = edgeTilesState[cursor]
+        cursor = cursor + 1
