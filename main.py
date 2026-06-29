@@ -108,8 +108,8 @@ def scanGrid(gridIn):
                 print("Failed to scan")
                 infinitePause()
                 delay = 1
-            moveGrid(x, y, gridIn, checkXShift, checkYShift) # Shows where the image is bieng checked, only works if the below delay line is uncommented
-            time.sleep(delay)
+            #moveGrid(x, y, gridIn, checkXShift, checkYShift) # Shows where the image is bieng checked, only works if the below delay line is uncommented
+            #time.sleep(delay)
         print(printRow)
         board.append(row)
     #print(board)
@@ -175,7 +175,7 @@ for y in range(0, grid[5]):
 
 # Iterate over every possibility of edge tiles and check if they are valid
 validBoards = []
-while len(validBoards < 100):
+while len(validBoards) < 100:
     # Place the bombs on a test board
     bombBoard = scannedBoard.copy()
     addedBombs = []
