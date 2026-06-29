@@ -9,6 +9,11 @@ import pydirectinput as direct
 import time
 import math
 
+# Esentially halts the program
+def infinitePause():
+    while True:
+        time.sleep(100)
+
 # Displays the hovered over position on the screen
 def getCoords():
     while True:
@@ -61,6 +66,7 @@ def scanGrid(gridIn):
     checkXShift = 0.05
     checkYShift = 0.24
     board = []
+    print("Scanning board:")
     for y in range(0,gridIn[5]):
         printRow = ""
         row = []
@@ -71,7 +77,8 @@ def scanGrid(gridIn):
                 row.append(-1)
                 delay = 0
             elif curColor == darkGreen:
-                printRow = printRow + "□"
+                #printRow = printRow + "□"
+                printRow = printRow + "■"
                 row.append(-1)
                 delay = 0
             elif curColor == lightTan or curColor == darkTan:
@@ -97,15 +104,19 @@ def scanGrid(gridIn):
             else:
                 printRow = printRow + "X"
                 row.append("Error with scan")
+                print("Failed to scan")
+                infinitePause()
                 delay = 1
             #moveGrid(x, y, gridIn, checkXShift, checkYShift) # Shows where the image is bieng checked, only works if the below delay line is uncommented
             #time.sleep(delay)
         print(printRow)
         board.append(row)
-    print(board)
+    #print(board)
+    return board
 
 # Waits until the destruction particles have gone away for a good scan
 def waitForDebris():
+    pydirectinput.moveTo(0,0)
     time.sleep(1)
 
 # Notes on the minesweeper board dimensions
@@ -140,4 +151,24 @@ centerX = math.floor(width/2)
 centerY = math.floor(hieght/2)
 moveClick(centerX,centerY,grid)
 waitForDebris()
-scanGrid(grid)
+scannedBoard = scanGrid(grid)
+
+# Work in progress, will likely become a function and then be put above this comment
+edgeTiles = []
+for y in range(0, grid[5]):
+    for x in range(0, grid[4]):
+        if scannedBoard[y][x] == -1:
+            valid = 0
+            for direction in range(0,8):
+                denormalizedX = [0,1,1,1,0,-1,-1,-1]
+                denormalizedY = [1,1,0,-1,-1,-1,0,1]
+                emptyX = x + denormalizedX[direction]
+                emptyY = y + denormalizedY[direction]
+                if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
+                    if scannedBoard[emptyY][emptyX] != -1:
+                        valid = 1
+            if valid == 1:
+                edgeTiles.append([x,y])
+print(edgeTiles)
+
+
