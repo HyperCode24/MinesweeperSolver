@@ -6,6 +6,7 @@ import pyautogui
 import pydirectinput
 import pydirectinput as direct
 import time
+import math
 
 # Displays the hovered over position on the screen
 def getCoords():
@@ -14,13 +15,11 @@ def getCoords():
         print(str(pyautogui.position()) + "\n" + str(pyautogui.pixel(xp, xy)))
 
 # Goes to a position in a grid with x1,x2,y1,y2 defining the corners
-def grid(x,y):
-    #print("Trying to move to x: " + str(x) + " y: " + str(y))
-    xgo = x1 + ((x-1) * ((x2-x1) / 9))
-    ygo = y1 + ((y-1) * ((y2-y1) / 7))
-    xgo = round(xgo)
-    ygo = round(ygo)
-    #print("Moving to: " + str(xgo) + " " + str(ygo))
+def moveGrid(x,y,gridIn):
+    xSpacing = (gridIn[1] - gridIn[0]) / gridIn[4]
+    ySpacing = (gridIn[3] - gridIn[2]) / gridIn[5]
+    xgo = math.floor(gridIn[0] + xSpacing * (x + 0.5))
+    ygo = math.floor(gridIn[2] + ySpacing * (y + 0.5))
     pydirectinput.moveTo(xgo,ygo)
 
 # Sets the failsafe delay to 0 while keeping the corner breakout
@@ -46,11 +45,16 @@ input("Hit enter when you are ready for bottom right corner")
 x2, y2 = pyautogui.position()
 print("Bottom right set to: " + str(x2) + " " + str(y2))
 
+# Define remaining size data and compact all of the values into a list for convinience
+width = 24
+hieght = 20
+grid = [x1,x2,y1,y2,width,hieght]
+
 # Add a small amount of delay
 print("Beginning sequence in 2 seconds")
 time.sleep(2)
 
 # Perform the solver on the grid (currently tests the movement function over 10 positions)
-for i in range(0,10):
-    grid(randint(0,23),randint(0,19))
+for i in range(0,1000):
+    moveGrid(randint(0,23),randint(0,19),grid)
     time.sleep(1)
