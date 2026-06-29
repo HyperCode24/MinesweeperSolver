@@ -60,37 +60,49 @@ def scanGrid(gridIn):
     # Scans over the image and traces those locations with the mouse
     checkXShift = 0.05
     checkYShift = 0.24
+    board = []
     for y in range(0,gridIn[5]):
         printRow = ""
+        row = []
         for x in range(0,gridIn[4]):
             curColor = grabColorGrid(x, y, gridIn, pix, checkXShift, checkYShift)
             if curColor == lightGreen:
                 printRow = printRow + "■"
+                row.append(-1)
                 delay = 0
             elif curColor == darkGreen:
                 printRow = printRow + "□"
+                row.append(-1)
                 delay = 0
             elif curColor == lightTan or curColor == darkTan:
                 printRow = printRow + "O"
+                row.append(0)
                 delay = 0.25
             elif curColor == one:
                 printRow = printRow + "1"
+                row.append(1)
                 delay = 0.25
             elif curColor == two:
                 printRow = printRow + "2"
+                row.append(2)
                 delay = 0.25
             elif curColor == three:
                 printRow = printRow + "3"
+                row.append(3)
                 delay = 0.25
             elif curColor == four:
                 printRow = printRow + "4"
+                row.append(4)
                 delay = 0.25
             else:
                 printRow = printRow + "X"
+                row.append("Error with scan")
                 delay = 1
             #moveGrid(x, y, gridIn, checkXShift, checkYShift) # Shows where the image is bieng checked, only works if the below delay line is uncommented
             #time.sleep(delay)
         print(printRow)
+        board.append(row)
+    print(board)
 
 # Waits until the destruction particles have gone away for a good scan
 def waitForDebris():
