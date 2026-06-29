@@ -8,9 +8,6 @@ import pydirectinput as direct
 import time
 import math
 
-from pygame.examples.window_opengl import image
-
-
 # Displays the hovered over position on the screen
 def getCoords():
     while True:
@@ -22,12 +19,17 @@ def setupFailsafes():
     pydirectinput.FAILSAFE = True
     pydirectinput.PAUSE = 0
 
-# Goes to a position in a grid with x1,x2,y1,y2 defining the corners
-def moveGrid(x,y,gridIn,shiftX=0,shiftY=0):
+# Converts grid positions into screen positions
+def toPosition(x,y,gridIn,shiftX=0,shiftY=0):
     xSpacing = (gridIn[2] - gridIn[0]) / gridIn[4]
     ySpacing = (gridIn[3] - gridIn[1]) / gridIn[5]
-    xgo = math.floor(gridIn[0] + xSpacing * (x + 0.5 + shiftX))
-    ygo = math.floor(gridIn[1] + ySpacing * (y + 0.5 + shiftY))
+    xout = math.floor(gridIn[0] + xSpacing * (x + 0.5 + shiftX))
+    yout = math.floor(gridIn[1] + ySpacing * (y + 0.5 + shiftY))
+    return xout, yout
+
+# Goes to a position in a grid with x1,y1,x2,y2 defining the corners
+def moveGrid(x,y,gridIn,shiftX=0,shiftY=0):
+    xgo, ygo = toPosition(x,y,gridIn,shiftX,shiftY)
     pydirectinput.moveTo(xgo,ygo)
 
 # Moves and clicks at a desired position
@@ -35,10 +37,21 @@ def moveClick(x,y,gridIn,shiftX=0,shiftY=0):
     moveGrid(x,y,gridIn,shiftX,shiftY)
     pydirectinput.click()
 
+# Returns the color from the provided grid position in the screenshot
+def grabColorGrid(x,y,gridIn,pixels,shiftX=0,shiftY=0):
+    xTest, yTest = toPosition(0, 0, gridIn, shiftX, shiftY)
+    return pixels[xTest,yTest]
+
 # Scans the board and determines what all of the squares are
-def scanGrid(grid):
-    img = ImageGrab.grab(grid[0:3])
+def scanGrid(gridIn):
+    img = ImageGrab.grab()
     img.save("testImage.png","PNG")
+    pix = img.load()
+    print(grabColorGrid(0,0,gridIn,pix))
+
+# Waits until the destruction particles have gone away for a good scan
+def waitForDebris():
+    time.sleep(1)
 
 # Notes on the minesweeper board dimensions
 '''
@@ -71,4 +84,5 @@ time.sleep(2)
 centerX = math.floor(width/2)
 centerY = math.floor(hieght/2)
 moveClick(centerX,centerY,grid)
-scanGrid()
+waitForDebris()
+scanGrid(grid)
