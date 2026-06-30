@@ -74,16 +74,16 @@ def scanGrid(gridIn):
         for x in range(0,gridIn[4]):
             curColor = grabColorGrid(x, y, gridIn, pix, checkXShift, checkYShift)
             if curColor == lightGreen:
-                printRow = printRow + "-"
+                printRow = printRow + "■"
                 row.append(-1)
                 delay = 0
             elif curColor == darkGreen:
                 #printRow = printRow + "□"
-                printRow = printRow + "-"
+                printRow = printRow + "■"
                 row.append(-1)
                 delay = 0
             elif curColor == lightTan or curColor == darkTan:
-                printRow = printRow + " "
+                printRow = printRow + "."
                 row.append(0)
                 delay = 0.25
             elif curColor == one:
@@ -130,6 +130,39 @@ def getCorners():
     print("Bottom right set to: " + str(x2) + " " + str(y2))
     return x1, y1, x2, y2
 
+# Using the grid and scanned board reports the tiles that are touching a number
+def getEdgeTiles(gridIn,scannedBoardIn):
+    edgeTiles = []
+    for y in range(0, gridIn[5]):
+        for x in range(0, gridIn[4]):
+            if scannedBoardIn[y][x] == -1:
+                valid = 0
+                for direction in range(0,8):
+                    denormalizedX = [0,1,1,1,0,-1,-1,-1]
+                    denormalizedY = [1,1,0,-1,-1,-1,0,1]
+                    emptyX = x + denormalizedX[direction]
+                    emptyY = y + denormalizedY[direction]
+                    if emptyX >= 0 and emptyX < gridIn[4] and emptyY >= 0 and emptyY < gridIn[5]:
+                        if scannedBoardIn[emptyY][emptyX] != -1:
+                            valid = 1
+                if valid == 1:
+                    edgeTiles.append([x,y])
+    return edgeTiles
+
+def boardArrayPrint(board):
+    print("Printout of the board:")
+    for y in range(0,len(board)):
+        row = ""
+        for x in range(0,len(board[0])):
+            if board[y][x] == -1:
+                row = row + "■"
+            elif board[y][x] == 0:
+                row = row + "."
+            else:
+                row = row + str(board[y][x])
+        print(row)
+    print("")
+
 # Notes on the minesweeper board dimensions
 '''
 Hard:
@@ -157,27 +190,20 @@ centerX = math.floor(width/2)
 centerY = math.floor(hieght/2)
 moveClick(centerX,centerY,grid)
 waitForDebris()
+
+# Scan the board to get the current state
 scannedBoard = scanGrid(grid)
 
 # Test values
 scannedBoard = [[0,0,0],[0,1,1],[0,1,-1]]
 grid = [0,0,0,0,3,3]
+boardArrayPrint(scannedBoard)
 
-# Find edge tiles and set up states for edge tiles
-edgeTiles = []
+# Solve the board in stages using simple rules
+edgeList = getEdgeTiles(grid,scannedBoard) # Don't know if I will need these, but keeping them around
+bombBoard = scannedBoard.copy()
+
 for y in range(0, grid[5]):
     for x in range(0, grid[4]):
-        if scannedBoard[y][x] == -1:
-            valid = 0
-            for direction in range(0,8):
-                denormalizedX = [0,1,1,1,0,-1,-1,-1]
-                denormalizedY = [1,1,0,-1,-1,-1,0,1]
-                emptyX = x + denormalizedX[direction]
-                emptyY = y + denormalizedY[direction]
-                if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
-                    if scannedBoard[emptyY][emptyX] != -1:
-                        valid = 1
-            if valid == 1:
-                edgeTiles.append([x,y])
+        print("Code goes here!")
 
-# Iterate over every possibility of edge tiles and check if they are valid
