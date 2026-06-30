@@ -74,16 +74,16 @@ def scanGrid(gridIn):
         for x in range(0,gridIn[4]):
             curColor = grabColorGrid(x, y, gridIn, pix, checkXShift, checkYShift)
             if curColor == lightGreen:
-                printRow = printRow + "■"
+                printRow = printRow + "-"
                 row.append(-1)
                 delay = 0
             elif curColor == darkGreen:
                 #printRow = printRow + "□"
-                printRow = printRow + "■"
+                printRow = printRow + "-"
                 row.append(-1)
                 delay = 0
             elif curColor == lightTan or curColor == darkTan:
-                printRow = printRow + "O"
+                printRow = printRow + " "
                 row.append(0)
                 delay = 0.25
             elif curColor == one:
@@ -120,6 +120,16 @@ def waitForDebris():
     pydirectinput.moveTo(0,0)
     time.sleep(1)
 
+# Prompt the user for the coordinates that are relevant for their screen
+def getCorners():
+    input("Hit enter when you are ready for top left corner")
+    x1, y1 = pyautogui.position()
+    print("Top left set to: " + str(x1) + " " + str(y1))
+    input("Hit enter when you are ready for bottom right corner")
+    x2, y2 = pyautogui.position()
+    print("Bottom right set to: " + str(x2) + " " + str(y2))
+    return x1, y1, x2, y2
+
 # Notes on the minesweeper board dimensions
 '''
 Hard:
@@ -130,13 +140,8 @@ Hard:
 # Ensure that the failsafes are configured correctly and active
 setupFailsafes()
 
-# Prompt the user for the coordinates that are relevant for their screen
-input("Hit enter when you are ready for top left corner")
-x1, y1 = pyautogui.position()
-print("Top left set to: " + str(x1) + " " + str(y1))
-input("Hit enter when you are ready for bottom right corner")
-x2, y2 = pyautogui.position()
-print("Bottom right set to: " + str(x2) + " " + str(y2))
+# Set up position variables and set their values
+x1, y1, x2, y2 = getCorners()
 
 # Define remaining size data and compact all of the values into a list for convinience
 width = 24
@@ -153,6 +158,10 @@ centerY = math.floor(hieght/2)
 moveClick(centerX,centerY,grid)
 waitForDebris()
 scannedBoard = scanGrid(grid)
+
+# Test values
+scannedBoard = [[0,0,0],[0,1,1],[0,1,-1]]
+grid = [0,0,0,0,3,3]
 
 # Find edge tiles and set up states for edge tiles
 edgeTiles = []
@@ -172,6 +181,7 @@ for y in range(0, grid[5]):
             if valid == 1:
                 edgeTiles.append([x,y])
                 edgeTilesLength = edgeTilesLength + 1
+print(edgeTiles)
 
 # Iterate over every possibility of edge tiles and check if they are valid
 validBoards = []
@@ -208,3 +218,4 @@ while len(validBoards) < 100:
             print("Invalid board!")
 
 print(len(validBoards))
+print(validBoards)
