@@ -165,7 +165,6 @@ grid = [0,0,0,0,3,3]
 
 # Find edge tiles and set up states for edge tiles
 edgeTiles = []
-edgeTilesLength = 0
 for y in range(0, grid[5]):
     for x in range(0, grid[4]):
         if scannedBoard[y][x] == -1:
@@ -180,42 +179,5 @@ for y in range(0, grid[5]):
                         valid = 1
             if valid == 1:
                 edgeTiles.append([x,y])
-                edgeTilesLength = edgeTilesLength + 1
-print(edgeTiles)
 
 # Iterate over every possibility of edge tiles and check if they are valid
-validBoards = []
-while len(validBoards) < 100:
-    # Place the bombs on a test board
-    bombBoard = scannedBoard.copy()
-    addedBombs = []
-    for i in range(0,edgeTilesLength):
-        if random.randint(0,1) == 0:
-            addedBombs.append(edgeTiles[i])
-            xo, yo = edgeTiles[i]
-            bombBoard[yo][xo] = 9
-    # Test if this placement is valid
-    valid = 1
-    for y in range(0, grid[5]):
-        for x in range(0, grid[4]):
-            if bombBoard[y][x] != -1 and bombBoard[y][x] != 0 and bombBoard[y][x] != 9:
-                count = 0
-                for direction in range(0, 8):
-                    denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
-                    denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
-                    bombX = x + denormalizedX[direction]
-                    bombY = y + denormalizedY[direction]
-                    if bombX >= 0 and bombX < grid[4] and bombY >= 0 and bombY < grid[5]:
-                        if bombBoard[bombY][bombX] == 9:
-                            count = count + 1
-                if count != bombBoard[y][x]:
-                    valid = 0
-    if valid == 1:
-        validBoards.append(addedBombs)
-        print("The board that was found is valid!")
-    else:
-        if random.randint(0, 10000) == 0:
-            print("Invalid board!")
-
-print(len(validBoards))
-print(validBoards)
