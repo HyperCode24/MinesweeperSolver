@@ -107,6 +107,7 @@ def scanGrid(gridIn):
                 row.append("Error with scan")
                 print("Failed to scan")
                 print("Failed color: " + str(curColor))
+                moveGrid(x, y, gridIn, checkXShift, checkYShift)
                 infinitePause()
                 delay = 1
             #moveGrid(x, y, gridIn, checkXShift, checkYShift) # Shows where the image is bieng checked, only works if the below delay line is uncommented
@@ -159,6 +160,8 @@ def boardArrayPrint(board):
                 row = row + "■"
             elif board[y][x] == 0:
                 row = row + "."
+            elif board[y][x] == 9:
+                row = row + "💣"
             else:
                 row = row + str(board[y][x])
         print(row)
@@ -186,8 +189,8 @@ width = 24
 hieght = 20
 grid = [x1,y1,x2,y2,width,hieght]
 
-# Add a small amount of delay
-print("Beginning sequence in 2 seconds")
+# Add a small amount of delay to allow it to be watched comfortably
+print("Beginning movement in 2 seconds./")
 time.sleep(2)
 
 # Click the center square to get things started
@@ -205,10 +208,31 @@ scannedBoard = scanGrid(grid)
 boardArrayPrint(scannedBoard)
 
 # Solve the board in stages using simple rules
+# 1: If a number is next to the same amount of blank tiles as its number, all of those are bombs
+# 2: If a number already has the number of bombs next to it as its number, everything else is safe
+
 edgeList = getEdgeTiles(grid,scannedBoard) # Don't know if I will need these, but keeping them around
 bombBoard = scannedBoard.copy()
 
 for y in range(0, grid[5]):
     for x in range(0, grid[4]):
-        print("Code goes here!")
-
+        if bombBoard[y][x] in [1,2,3,4,5,6,7,8]:
+            surroundingTiles = 0
+            for direction in range(0, 8):
+                denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
+                denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
+                emptyX = x + denormalizedX[direction]
+                emptyY = y + denormalizedY[direction]
+                if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
+                    if bombBoard[emptyY][emptyX] in [-1,9]:
+                        surroundingTiles = surroundingTiles + 1
+            if surroundingTiles == bombBoard[y][x]:
+                for direction in range(0, 8):
+                    denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
+                    denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
+                    emptyX = x + denormalizedX[direction]
+                    emptyY = y + denormalizedY[direction]
+                    if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
+                        if bombBoard[emptyY][emptyX] == -1:
+                            bombBoard[emptyY][emptyX] = 9
+boardArrayPrint(bombBoard)
