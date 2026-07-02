@@ -44,6 +44,11 @@ def moveClick(x,y,gridIn,shiftX=0,shiftY=0):
     moveGrid(x,y,gridIn,shiftX,shiftY)
     pydirectinput.click()
 
+# Moves and right clicks at a desired position
+def moveRightClick(x,y,gridIn,shiftX=0,shiftY=0):
+    moveGrid(x,y,gridIn,shiftX,shiftY)
+    pydirectinput.rightClick()
+
 # Returns the color from the provided grid position in the screenshot
 def grabColorGrid(x,y,gridIn,pixels,shiftX=0,shiftY=0):
     xTest, yTest = toPosition(x, y, gridIn, shiftX, shiftY)
@@ -65,9 +70,13 @@ def scanGrid(gridIn):
     three = (211, 47, 47)
     four = (123, 31, 162)
     five = (255, 143, 0)
+    six = (0, 151, 167)
+    seven = (66, 66, 66)
     # Scans over the image and traces those locations with the mouse
     checkXShift = 0.05
     checkYShift = 0.24
+    checkXShift7 = 0
+    checkYShift7 = 0
     board = []
     print("Scanning board:")
     for y in range(0,gridIn[5]):
@@ -108,14 +117,23 @@ def scanGrid(gridIn):
                 printRow = printRow + "5"
                 row.append(5)
                 delay = 0.25
+            elif curColor == six:
+                printRow = printRow + "6"
+                row.append(6)
+                delay = 0.25
             else:
-                printRow = printRow + "X"
-                row.append("Error with scan")
-                print("Failed to scan")
-                print("Failed color: " + str(curColor))
-                moveGrid(x, y, gridIn, checkXShift, checkYShift)
-                infinitePause()
-                delay = 1
+                if grabColorGrid(x, y, gridIn, pix, checkXShift7, checkYShift7) == seven:
+                    printRow = printRow + "7"
+                    row.append(7)
+                    delay = 0.25
+                else:
+                    printRow = printRow + "X"
+                    row.append("Error with scan")
+                    print("Failed to scan")
+                    print("Failed color: " + str(curColor))
+                    moveGrid(x, y, gridIn, checkXShift, checkYShift)
+                    infinitePause()
+                    delay = 1
             #moveGrid(x, y, gridIn, checkXShift, checkYShift) # Shows where the image is bieng checked, only works if the below delay line is uncommented
             #time.sleep(delay)
         print(printRow)
@@ -206,68 +224,87 @@ moveClick(centerX,centerY,grid)
 waitForDebris()
 
 # Scan the board to get the current state
-scannedBoard = scanGrid(grid)
 
-# Test values
-#scannedBoard = [[0,0,0],[0,1,1],[0,1,-1]]
-#grid = [0,0,0,0,3,3]
-boardArrayPrint(scannedBoard)
 
 # Solve the board in stages using simple rules
 # 1: If a number is next to the same amount of blank tiles as its number, all of those are bombs
 # 2: If a number already has the number of bombs next to it as its number, everything else is safe
 
-edgeList = getEdgeTiles(grid,scannedBoard) # Don't know if I will need these, but keeping them around
-bombBoard = scannedBoard.copy()
+bombPositions = []
+somethingChanged = 1
+while somethingChanged == 1:
+    somethingChanged = 0
 
-# Rule 1
-for y in range(0, grid[5]):
-    for x in range(0, grid[4]):
-        if bombBoard[y][x] in [1,2,3,4,5,6,7,8]:
-            surroundingTiles = 0
-            for direction in range(0, 8):
-                denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
-                denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
-                emptyX = x + denormalizedX[direction]
-                emptyY = y + denormalizedY[direction]
-                if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
-                    if bombBoard[emptyY][emptyX] in [-1,9]:
-                        surroundingTiles = surroundingTiles + 1
-            if surroundingTiles == bombBoard[y][x]:
+    # Scan the board and add back any bombs that have been identified
+    scannedBoard = scanGrid(grid)
+    bombBoard = scannedBoard.copy()
+    for pos in bombPositions:
+        x, y = pos
+        bombBoard[y][x] = 9
+
+    # Rule 1
+    for y in range(0, grid[5]):
+        for x in range(0, grid[4]):
+            if bombBoard[y][x] in [1,2,3,4,5,6,7,8]:
+                surroundingTiles = 0
                 for direction in range(0, 8):
                     denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
                     denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
                     emptyX = x + denormalizedX[direction]
                     emptyY = y + denormalizedY[direction]
                     if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
-                        if bombBoard[emptyY][emptyX] == -1:
-                            bombBoard[emptyY][emptyX] = 9
+                        if bombBoard[emptyY][emptyX] in [-1,9]:
+                            surroundingTiles = surroundingTiles + 1
+                if surroundingTiles == bombBoard[y][x]:
+                    for direction in range(0, 8):
+                        denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
+                        denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
+                        emptyX = x + denormalizedX[direction]
+                        emptyY = y + denormalizedY[direction]
+                        if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
+                            if bombBoard[emptyY][emptyX] == -1:
+                                bombBoard[emptyY][emptyX] = 9
+                                bombPositions.append([emptyX,emptyY])
+                                moveRightClick(emptyX, emptyY, grid)
+                                somethingChanged = 1
 
-# Print a debug board
-boardArrayPrint(bombBoard)
-
-# Rule 2
-for y in range(0, grid[5]):
-    for x in range(0, grid[4]):
-        if bombBoard[y][x] in [1,2,3,4,5,6,7,8]:
-            surroundingBombs = 0
-            for direction in range(0, 8):
-                denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
-                denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
-                emptyX = x + denormalizedX[direction]
-                emptyY = y + denormalizedY[direction]
-                if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
-                    if bombBoard[emptyY][emptyX] in [9]:
-                        surroundingBombs = surroundingBombs + 1
-            if surroundingBombs == bombBoard[y][x]:
+    # Rule 2
+    for y in range(0, grid[5]):
+        for x in range(0, grid[4]):
+            if bombBoard[y][x] in [1,2,3,4,5,6,7,8]:
+                surroundingBombs = 0
                 for direction in range(0, 8):
                     denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
                     denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
                     emptyX = x + denormalizedX[direction]
                     emptyY = y + denormalizedY[direction]
                     if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
-                        if bombBoard[emptyY][emptyX] == -1:
-                            moveClick(emptyX,emptyY,grid)
+                        if bombBoard[emptyY][emptyX] in [9]:
+                            surroundingBombs = surroundingBombs + 1
+                if surroundingBombs == bombBoard[y][x]:
+                    for direction in range(0, 8):
+                        denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
+                        denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
+                        emptyX = x + denormalizedX[direction]
+                        emptyY = y + denormalizedY[direction]
+                        if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
+                            if bombBoard[emptyY][emptyX] == -1:
+                                moveClick(emptyX,emptyY,grid)
+                                somethingChanged = 1
+
+    # Guess randomly if nothing happened
+    randomTiles = []
+    if somethingChanged == 0:
+        for y in range(0, grid[5]):
+            for x in range(0, grid[4]):
+                if bombBoard[y][x] == -1:
+                    randomTiles.append([x,y])
+    x,y = random.choice(randomTiles)
+    moveClick(x, y, grid)
+    somethingChanged = 1
+
+    # To prevent debris from messing up the scan
+    waitForDebris()
 
 # Print a debug board
 boardArrayPrint(bombBoard)
