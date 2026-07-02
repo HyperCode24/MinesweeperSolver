@@ -292,16 +292,17 @@ while somethingChanged == 1:
                                 moveClick(emptyX,emptyY,grid)
                                 somethingChanged = 1
 
-    # Guess randomly if nothing happened
+    # Guess randomly if nothing else works
     randomTiles = []
     if somethingChanged == 0:
         for y in range(0, grid[5]):
             for x in range(0, grid[4]):
                 if bombBoard[y][x] == -1:
                     randomTiles.append([x,y])
-    x,y = random.choice(randomTiles)
-    moveClick(x, y, grid)
-    somethingChanged = 1
+        if len(randomTiles) != 0:
+            x,y = random.choice(randomTiles)
+            moveClick(x, y, grid)
+            somethingChanged = 1
 
     # To prevent debris from messing up the scan
     waitForDebris()
