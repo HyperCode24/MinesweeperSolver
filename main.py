@@ -56,7 +56,7 @@ def grabColorGrid(x,y,gridIn,pixels,shiftX=0,shiftY=0):
 
 # Scans the board and determines what all of the squares are
 def scanGrid(gridIn):
-    pydirectinput.moveTo(0,0)
+    moveGrid(-1,-1,gridIn)
     img = ImageGrab.grab()
     img.save("testImage.png","PNG")
     pix = img.load()
