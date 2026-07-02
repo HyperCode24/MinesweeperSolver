@@ -10,7 +10,7 @@ import pydirectinput
 import pydirectinput as direct
 import time
 import math
-import from sys import exit
+from sys import exit
 
 # Esentially halts the program
 def infinitePause():
