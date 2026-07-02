@@ -106,6 +106,7 @@ def scanGrid(gridIn):
                 printRow = printRow + "X"
                 row.append("Error with scan")
                 print("Failed to scan")
+                print("Failed color: " + str(curColor))
                 infinitePause()
                 delay = 1
             #moveGrid(x, y, gridIn, checkXShift, checkYShift) # Shows where the image is bieng checked, only works if the below delay line is uncommented
@@ -174,7 +175,11 @@ Hard:
 setupFailsafes()
 
 # Set up position variables and set their values
-x1, y1, x2, y2 = getCorners()
+getTheCorners = input("Do you want to re-record the corners?\n")
+if getTheCorners == "Y" or getTheCorners == "y" or getTheCorners == "Yes" or getTheCorners == "yes" or getTheCorners == "YES":
+    x1, y1, x2, y2 = getCorners()
+else:
+    x1, y1, x2, y2 = 604, 267, 1937, 1378
 
 # Define remaining size data and compact all of the values into a list for convinience
 width = 24
@@ -195,8 +200,8 @@ waitForDebris()
 scannedBoard = scanGrid(grid)
 
 # Test values
-scannedBoard = [[0,0,0],[0,1,1],[0,1,-1]]
-grid = [0,0,0,0,3,3]
+#scannedBoard = [[0,0,0],[0,1,1],[0,1,-1]]
+#grid = [0,0,0,0,3,3]
 boardArrayPrint(scannedBoard)
 
 # Solve the board in stages using simple rules
