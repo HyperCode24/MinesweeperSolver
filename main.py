@@ -1,5 +1,6 @@
 # Import all required libraries
 import random
+import sys
 from linecache import checkcache
 from random import randint
 from PIL import ImageGrab
@@ -9,6 +10,7 @@ import pydirectinput
 import pydirectinput as direct
 import time
 import math
+import from sys import exit
 
 # Esentially halts the program
 def infinitePause():
@@ -57,7 +59,7 @@ def grabColorGrid(x,y,gridIn,pixels,shiftX=0,shiftY=0):
 # Scans the board and determines what all of the squares are
 def scanGrid(gridIn):
     moveGrid(-1,-1,gridIn)
-    time.sleep(0.02)
+    time.sleep(0.04)
     img = ImageGrab.grab()
     img.save("testImage.png","PNG")
     pix = img.load()
@@ -69,7 +71,7 @@ def scanGrid(gridIn):
     one = (25, 118, 210)
     two = (56, 142, 60)
     three = (211, 47, 47)
-    four = (123, 31, 162)
+    four = [(123, 31, 162),(123, 32, 162),(137, 34, 142)]
     five = (255, 143, 0)
     six = (0, 151, 167)
     seven = (66, 66, 66)
@@ -110,7 +112,7 @@ def scanGrid(gridIn):
                 printRow = printRow + "3"
                 row.append(3)
                 delay = 0.25
-            elif curColor == four:
+            elif curColor in four:
                 printRow = printRow + "4"
                 row.append(4)
                 delay = 0.25
@@ -133,11 +135,11 @@ def scanGrid(gridIn):
                     print("Failed to scan")
                     print("Failed color: " + str(curColor))
                     moveGrid(x, y, gridIn, checkXShift, checkYShift)
-                    infinitePause()
                     delay = 1
+                    sys.exit()
             #moveGrid(x, y, gridIn, checkXShift, checkYShift) # Shows where the image is bieng checked, only works if the below delay line is uncommented
             #time.sleep(delay)
-        print(printRow)
+        #print(printRow)
         board.append(row)
     #print(board)
     return board
@@ -203,7 +205,8 @@ Hard:
 setupFailsafes()
 
 # Set up position variables and set their values
-getTheCorners = input("Do you want to re-record the corners?")
+#getTheCorners = input("Do you want to re-record the corners?")
+getTheCorners = "no"
 if getTheCorners == "Y" or getTheCorners == "y" or getTheCorners == "Yes" or getTheCorners == "yes" or getTheCorners == "YES":
     x1, y1, x2, y2 = getCorners()
 else:
@@ -233,6 +236,7 @@ waitForDebris()
 
 bombPositions = []
 somethingChanged = 1
+randomGuesses = 0
 while somethingChanged == 1:
     somethingChanged = 0
 
@@ -293,14 +297,12 @@ while somethingChanged == 1:
                                 moveClick(emptyX,emptyY,grid)
                                 somethingChanged = 1
 
-    # Guess randomly if nothing else works
-    randomTiles = []
+    # Guess a random edge if nothing else works
     if somethingChanged == 0:
-        for y in range(0, grid[5]):
-            for x in range(0, grid[4]):
-                if bombBoard[y][x] == -1:
-                    randomTiles.append([x,y])
+        randomTiles = getEdgeTiles(grid,bombBoard)
         if len(randomTiles) != 0:
+            randomGuesses = randomGuesses + 1
+            print("Making random guess " + str(randomGuesses) + ".")
             x,y = random.choice(randomTiles)
             moveClick(x, y, grid)
             somethingChanged = 1
