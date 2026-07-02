@@ -297,12 +297,33 @@ while somethingChanged == 1:
                                 moveClick(emptyX,emptyY,grid)
                                 somethingChanged = 1
 
-    # Guess a random edge if nothing else works
+    # Attempt to find a safe square by checking all edge bomb combinations
+    if somethingChanged == 0:
+        checkTiles = getEdgeTiles(grid,bombBoard)
+
+
+
+
+    # Guess a random edge tile if none of the above worked
     if somethingChanged == 0:
         randomTiles = getEdgeTiles(grid,bombBoard)
         if len(randomTiles) != 0:
             randomGuesses = randomGuesses + 1
-            print("Making random guess " + str(randomGuesses) + ".")
+            print("Making random edge guess " + str(randomGuesses) + ".")
+            x,y = random.choice(randomTiles)
+            moveClick(x, y, grid)
+            somethingChanged = 1
+
+    # If nothing else works, guess randomly
+    if somethingChanged == 0:
+        randomTiles = []
+        for y in range(0, grid[5]):
+            for x in range(0, grid[4]):
+                if bombBoard[y][x] == -1:
+                    randomTiles.append([x,y])
+        if len(randomTiles) != 0:
+            randomGuesses = randomGuesses + 1
+            print("Making random anywhere guess " + str(randomGuesses) + ".")
             x,y = random.choice(randomTiles)
             moveClick(x, y, grid)
             somethingChanged = 1
