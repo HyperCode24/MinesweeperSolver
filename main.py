@@ -51,6 +51,7 @@ def grabColorGrid(x,y,gridIn,pixels,shiftX=0,shiftY=0):
 
 # Scans the board and determines what all of the squares are
 def scanGrid(gridIn):
+    pydirectinput.moveTo(0,0)
     img = ImageGrab.grab()
     img.save("testImage.png","PNG")
     pix = img.load()
@@ -63,6 +64,7 @@ def scanGrid(gridIn):
     two = (56, 142, 60)
     three = (211, 47, 47)
     four = (123, 31, 162)
+    five = (255, 143, 0)
     # Scans over the image and traces those locations with the mouse
     checkXShift = 0.05
     checkYShift = 0.24
@@ -101,6 +103,10 @@ def scanGrid(gridIn):
             elif curColor == four:
                 printRow = printRow + "4"
                 row.append(4)
+                delay = 0.25
+            elif curColor == five:
+                printRow = printRow + "5"
+                row.append(5)
                 delay = 0.25
             else:
                 printRow = printRow + "X"
@@ -161,7 +167,7 @@ def boardArrayPrint(board):
             elif board[y][x] == 0:
                 row = row + "."
             elif board[y][x] == 9:
-                row = row + "💣"
+                row = row + "B"
             else:
                 row = row + str(board[y][x])
         print(row)
@@ -178,7 +184,7 @@ Hard:
 setupFailsafes()
 
 # Set up position variables and set their values
-getTheCorners = input("Do you want to re-record the corners?\n")
+getTheCorners = input("Do you want to re-record the corners?")
 if getTheCorners == "Y" or getTheCorners == "y" or getTheCorners == "Yes" or getTheCorners == "yes" or getTheCorners == "YES":
     x1, y1, x2, y2 = getCorners()
 else:
@@ -190,7 +196,7 @@ hieght = 20
 grid = [x1,y1,x2,y2,width,hieght]
 
 # Add a small amount of delay to allow it to be watched comfortably
-print("Beginning movement in 2 seconds./")
+print("Beginning movement in 2 seconds.")
 time.sleep(2)
 
 # Click the center square to get things started
@@ -214,6 +220,7 @@ boardArrayPrint(scannedBoard)
 edgeList = getEdgeTiles(grid,scannedBoard) # Don't know if I will need these, but keeping them around
 bombBoard = scannedBoard.copy()
 
+# Rule 1
 for y in range(0, grid[5]):
     for x in range(0, grid[4]):
         if bombBoard[y][x] in [1,2,3,4,5,6,7,8]:
@@ -235,4 +242,32 @@ for y in range(0, grid[5]):
                     if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
                         if bombBoard[emptyY][emptyX] == -1:
                             bombBoard[emptyY][emptyX] = 9
+
+# Print a debug board
+boardArrayPrint(bombBoard)
+
+# Rule 2
+for y in range(0, grid[5]):
+    for x in range(0, grid[4]):
+        if bombBoard[y][x] in [1,2,3,4,5,6,7,8]:
+            surroundingBombs = 0
+            for direction in range(0, 8):
+                denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
+                denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
+                emptyX = x + denormalizedX[direction]
+                emptyY = y + denormalizedY[direction]
+                if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
+                    if bombBoard[emptyY][emptyX] in [9]:
+                        surroundingBombs = surroundingBombs + 1
+            if surroundingBombs == bombBoard[y][x]:
+                for direction in range(0, 8):
+                    denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
+                    denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
+                    emptyX = x + denormalizedX[direction]
+                    emptyY = y + denormalizedY[direction]
+                    if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
+                        if bombBoard[emptyY][emptyX] == -1:
+                            moveClick(emptyX,emptyY,grid)
+
+# Print a debug board
 boardArrayPrint(bombBoard)
