@@ -1,6 +1,7 @@
 # Import all required libraries
 import random
 import sys
+from itertools import repeat
 from linecache import checkcache
 from random import randint
 from PIL import ImageGrab
@@ -194,6 +195,10 @@ def boardArrayPrint(board):
         print(row)
     print("")
 
+# All binary numbers of length n
+def allbin(n):
+    return [f'{i:0{n}b}' for i in range(1 << n)]
+
 # Notes on the minesweeper board dimensions
 '''
 Hard:
@@ -214,7 +219,9 @@ else:
 
 # Define remaining size data and compact all of the values into a list for convinience
 width = 24
+#width = 18
 hieght = 20
+#hieght = 14
 grid = [x1,y1,x2,y2,width,hieght]
 
 # Add a small amount of delay to allow it to be watched comfortably
@@ -297,10 +304,52 @@ while somethingChanged == 1:
                                 moveClick(emptyX,emptyY,grid)
                                 somethingChanged = 1
 
-    # Attempt to find a safe square by checking some of the edge bomb combinations TODO: try all
-    if somethingChanged == 0:
-        checkTiles = getEdgeTiles(grid,bombBoard)
-        #TODO: Finish this
+    # Attempt to find a safe square by checking some of the edge bomb combinations #TODO: Fix this
+    if somethingChanged == 999:
+        testCutoff = 10 #TODO: Test higher values of this
+        originalEdgeTiles = getEdgeTiles(grid, bombBoard)
+        random.shuffle(originalEdgeTiles) #TODO: Test if this line actually hurts solution chance
+        #checkTiles = originalEdgeTiles[:testCutoff]
+        checkTiles = originalEdgeTiles.copy() #TODO: Remove this
+        workingCombos = []
+        allBinaryCombos = allbin(len(checkTiles))
+        lengthAllBinaryCombos = len(allBinaryCombos)
+        testedBoards = 0
+        for combo in allBinaryCombos:
+            realCheckTiles = []
+            currentCharacter = 0
+            while currentCharacter < testCutoff:
+                if [int(d) for d in str(combo)][currentCharacter] == 1:
+                    realCheckTiles.append(checkTiles[currentCharacter])
+                currentCharacter = currentCharacter + 1
+            bombBoardCopy = bombBoard.copy()
+            for tile in realCheckTiles:
+                x,y = tile
+                bombBoardCopy[y][x] = 9
+            valid = 1
+            for y in range(0, grid[5]):
+                for x in range(0, grid[4]):
+                    if bombBoardCopy[y][x] in [1, 2, 3, 4, 5, 6, 7, 8]:
+                        surroundingBombs = 0
+                        for direction in range(0, 8):
+                            denormalizedX = [0, 1, 1, 1, 0, -1, -1, -1]
+                            denormalizedY = [1, 1, 0, -1, -1, -1, 0, 1]
+                            emptyX = x + denormalizedX[direction]
+                            emptyY = y + denormalizedY[direction]
+                            if emptyX >= 0 and emptyX < grid[4] and emptyY >= 0 and emptyY < grid[5]:
+                                if bombBoard[emptyY][emptyX] in [9]:
+                                    surroundingBombs = surroundingBombs + 1
+                        if surroundingBombs > bombBoard[y][x]: #TODO: figure out how to text for exact values
+                            valid = 0
+            if valid == 1:
+                workingCombos.append(realCheckTiles)
+            testedBoards = testedBoards + 1
+            print("tested board " + str(testedBoards))
+
+
+        print(workingCombos)
+        print(len(workingCombos))
+        sys.exit()
 
     # Guess a random edge tile if none of the above worked
     if somethingChanged == 0:
