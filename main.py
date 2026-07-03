@@ -186,9 +186,9 @@ def boardArrayPrint(board):
             if board[y][x] == -1:
                 row = row + "■"
             elif board[y][x] == 0:
-                row = row + "."
+                row = row + " "
             elif board[y][x] == 9:
-                row = row + "B"
+                row = row + "□"
             else:
                 row = row + str(board[y][x])
         print(row)
@@ -300,9 +300,10 @@ while somethingChanged == 1:
     # Attempt to find a safe square by checking all edge bomb combinations
     if somethingChanged == 0:
         checkTiles = getEdgeTiles(grid,bombBoard)
-
-
-
+        boardArrayPrint(bombBoard)
+        print(checkTiles)
+        print(len(checkTiles))
+        sys.exit()
 
     # Guess a random edge tile if none of the above worked
     if somethingChanged == 0:
