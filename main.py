@@ -297,13 +297,10 @@ while somethingChanged == 1:
                                 moveClick(emptyX,emptyY,grid)
                                 somethingChanged = 1
 
-    # Attempt to find a safe square by checking all edge bomb combinations
+    # Attempt to find a safe square by checking some of the edge bomb combinations TODO: try all
     if somethingChanged == 0:
         checkTiles = getEdgeTiles(grid,bombBoard)
-        boardArrayPrint(bombBoard)
-        print(checkTiles)
-        print(len(checkTiles))
-        sys.exit()
+        #TODO: Finish this
 
     # Guess a random edge tile if none of the above worked
     if somethingChanged == 0:
